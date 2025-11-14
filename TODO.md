@@ -33,14 +33,14 @@
             -Un tableau ressemblant a la fiche_de_paie.xlsx
             -Un bouton exporter en xlsx si necessaire
     ## Backend
-        1-Une fonction getEmployers()
+        1-Une fonction getEmployers() OK
             Type de retours: List<Employer>
-        2-Une fonction getEmployerById(int id)
+        2-Une fonction getEmployerById(int id) OK
             Type de retours: Employer
-        3-Une fonction getDemandeConge(Statut s)
+        3-Une fonction getDemandeConge(Statut s) OK
             -s = VALIDE
             -Type de retour : List<DemandeConge,Employer e>
-        4-Une fonction getAbsence(Employer e,Date d)
+        4-Une fonction getAbsence(Employer e,Date d) OK
             -Extraction du mois et annees
             -Utilisation de la table historique absence
             -Type de retour : List<Absence>
