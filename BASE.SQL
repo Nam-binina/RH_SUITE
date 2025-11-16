@@ -366,3 +366,10 @@ INSERT INTO type_contrat (nom, duree_essai) VALUES
 ('CDD', 30),
 ('Stage', 15),
 ('Contrat à durée indéterminée période essai', 90);
+CREATE TABLE horaire (
+    id SERIAL PRIMARY KEY,
+    id_departement INT REFERENCES departement(id) ON DELETE CASCADE,
+    heure_entree TIME NOT NULL,
+    heure_sortie TIME NOT NULL
+);
+

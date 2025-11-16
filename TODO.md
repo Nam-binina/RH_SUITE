@@ -48,7 +48,7 @@
             -Verification des donne
             -creation de variable nbr de jours = fin - debut
             -Insertion dans demande conge
-            Type de retours: List<DemandeConge>
+            Type de retours: DemandeConge
         6-Une fonction getCongeEnAttente(Status s)
             -s = EN ATTENTE
             Type de retours: List<DemandeConge>

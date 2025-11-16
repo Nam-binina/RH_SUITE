@@ -14,7 +14,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/employers")
 public class EmployerController {
-
     private final EmployerService employerService;
 
     public EmployerController(EmployerService employerService) {

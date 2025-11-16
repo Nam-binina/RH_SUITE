@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/absences")
 public class HistoriqueAbsenceController {
-
     private final HistoriqueAbsenceService historiqueAbsenceService;
 
     public HistoriqueAbsenceController(HistoriqueAbsenceService historiqueAbsenceService) {

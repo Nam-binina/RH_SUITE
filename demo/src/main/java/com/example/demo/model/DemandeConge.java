@@ -1,8 +1,11 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "demande_conge")
@@ -141,5 +144,32 @@ public class DemandeConge {
 
     public void setCommentaireValidation(String commentaireValidation) {
         this.commentaireValidation = commentaireValidation;
+    }
+
+    public DemandeConge createConge(Statut s, TypeConge typeConge,LocalDate debut,LocalDate fin,String motif,Employer e){ 
+        if (s==null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        if (typeConge == null) {
+            throw new IllegalArgumentException("TypeConge must be positive");
+        }
+        if (debut == null || fin == null || debut.isAfter(fin)) {
+            throw new IllegalArgumentException("Invalid start or end date");
+        }
+        if (motif == null || motif.isEmpty()) {
+            throw new IllegalArgumentException("Motif cannot be null or empty");
+        }
+        if (e == null) {
+            throw new IllegalArgumentException("Employer cannot be null");
+        }
+        this.idEmploye = e.getId();
+        this.idTypeConge = typeConge.getId();
+        this.dateDebut = debut;
+        this.dateFin = fin;
+        this.nombreJours = (int) (fin.toEpochDay() - debut.toEpochDay()) + 1;
+        this.motif = motif;
+        this.statut = s.toString();
+        this.dateDemande = LocalDateTime.now();
+        return this;
     }
 }

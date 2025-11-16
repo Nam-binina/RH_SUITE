@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "pointage")
@@ -131,5 +135,49 @@ public class Pointage {
 
     public void setStatut(String statut) {
         this.statut = statut;
+    }
+
+    public Pointage create(LocalTime debut,LocalTime fin,LocalTime pauseD,LocalTime pauseF,LocalDate jour,Employer emp,Horaire h) {
+        if (emp == null) {
+            throw new IllegalArgumentException("Employer cannot be null");
+        }
+        if (jour == null) {
+            throw new IllegalArgumentException("Date pointage cannot be null");
+        }
+        if (debut == null || fin == null) {
+            throw new IllegalArgumentException("Heure entree and sortie cannot be null");
+        }
+        Duration total = Duration.between(debut, fin);
+        Duration pause = Duration.ZERO;
+        if (pauseD != null && pauseF != null) {
+            pause = Duration.between(pauseD, pauseF);
+        }
+        Duration worked = total.minus(pause);
+        BigDecimal heuresTravaillees = BigDecimal.valueOf(worked.toMinutes()).divide(BigDecimal.valueOf(60), 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal heuresSupp = BigDecimal.ZERO;
+        Duration dureeNormale = Duration.between(h.getHeureEntree(), h.getHeureSortie());
+        BigDecimal heuresNormales = BigDecimal.valueOf(dureeNormale.toMinutes())
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+        int retardMinutes = 0;
+        if (heuresTravaillees.compareTo(heuresNormales) > 0) {
+            heuresSupp = heuresTravaillees.subtract(heuresNormales);
+        }
+
+        if (debut.isAfter(h.getHeureEntree())) {
+            retardMinutes = (int) Duration.between(h.getHeureEntree(), debut).toMinutes();
+            if (retardMinutes <= 5) {
+                retardMinutes = 0;
+            }
+        }
+        this.setIdEmploye(emp.getId());
+        this.setDatePointage(jour);
+        this.setHeureEntree(debut);
+        this.setHeureSortie(fin);
+        this.setPauseDebut(pauseD);
+        this.setPauseFin(pauseF);
+        this.setHeuresTravaillees(heuresTravaillees);
+        this.setHeuresSupplementaires(heuresSupp);
+        this.setRetardMinutes(retardMinutes);
+        return this;
     }
 }
