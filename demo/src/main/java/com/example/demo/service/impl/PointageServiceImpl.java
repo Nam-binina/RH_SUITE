@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.example.demo.model.Pointage;
 import com.example.demo.repository.HoraireRepository;
@@ -22,8 +21,6 @@ import com.example.demo.service.PointageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Service
 public class PointageServiceImpl implements PointageService {
@@ -33,7 +30,7 @@ public class PointageServiceImpl implements PointageService {
     
     // Constantes métier
     private static final int TOLERANCE_RETARD_MINUTES = 5;
-    private static final BigDecimal HEURES_TRAVAIL_STANDARD = new BigDecimal("8"); // Heures standard par jour
+    private static final BigDecimal HEURES_TRAVAIL_STANDARD = new BigDecimal("8"); 
 
     public PointageServiceImpl(PointageRepository repo,HoraireRepository h) {
         this.repo = repo;
@@ -120,6 +117,8 @@ public class PointageServiceImpl implements PointageService {
     @Override
     public Pointage findById(Integer id) {
         return repo.findById(id).orElse(null);
+    }
+
 
     @Override
     public List<Pointage> findByEmployeAndDateRange(Integer idEmploye, LocalDate dateDebut, LocalDate dateFin) {

@@ -1,59 +1,29 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.EmployerService;
-import com.example.demo.service.PointageService ;
-import com.example.demo.model.Employer;
-import com.example.demo.model.Pointage;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-
-
 import jakarta.servlet.http.HttpSession;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-
-@RestController
-@RequestMapping("/pointages")
-public class PointageController {
-    PointageService pointageService;
-    EmployerService emp;
-
-    public PointageController(PointageService pointageService, EmployerService emp) {
-        this.pointageService = pointageService;
-        this.emp = emp;
-    }
-    @PostMapping("/create")
-    public Pointage createPointage(@RequestParam LocalTime debut, @RequestParam LocalTime sortie,LocalTime pauseD,
-            LocalTime pauseF,LocalDate jour,HttpSession session) {
-        Employer e = (Employer) session.getAttribute("employer");
-        //Employer e = emp.getEmployerById(1).get();
-        // returnPointageService.save(p);
-        return pointageService.create(debut, sortie, pauseD, pauseF, jour, e);
-    }
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity; // <-- Ajouté
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping; // <-- Ajouté
 
 import com.example.demo.model.Pointage;
+import com.example.demo.model.Employer;
 import com.example.demo.service.PointageService;
+
+
+
 
 /**
  * Contrôleur pour la gestion du pointage des employés
@@ -69,7 +39,14 @@ public class PointageController {
     public PointageController(PointageService pointageService) {
         this.pointageService = pointageService;
     }
-
+    @PostMapping("/create")
+    public Pointage createPointage(@RequestParam LocalTime debut, @RequestParam LocalTime sortie,LocalTime pauseD,
+            LocalTime pauseF,LocalDate jour,HttpSession session) {
+        Employer e = (Employer) session.getAttribute("employer");
+        //Employer e = emp.getEmployerById(1).get();
+        // returnPointageService.save(p);
+        return pointageService.create(debut, sortie, pauseD, pauseF, jour, e);
+    }
     /**
      * Enregistre un nouveau pointage avec calcul automatique des heures travaillées,
      * heures supplémentaires et retards
