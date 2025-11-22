@@ -1,10 +1,10 @@
 # entreprise_Spring
     ## Frontend
         A-Partie RH
-        1-Une page liste des employer
+        1-Une page liste des employer(OK)
             -Fonction filtre,rechercher
             -Avec un boutton pour voir la fiche personnel de chaque employer
-        2-Fiche personnel
+        2-Fiche personnel (OK)
             -Affichage du nom,prenom,numero,address,photo,date embauche et date de fin de contrat,departement et son manager
         3-Un page de calendrier de suivie des absence et conge
             -Une input date

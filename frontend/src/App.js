@@ -1,213 +1,261 @@
-import React, { useState } from 'react';
+import { createTheme, CssBaseline, ThemeProvider, Box } from "@mui/material";
+import "./App.css";
 import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  AppBar,
-  Toolbar,
-  Typography,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Box,
-  Container,
-  IconButton,
-  Avatar,
-  Badge,
-  Divider
-} from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Notifications,
-  People,
-  CalendarToday,
-  CheckCircle,
-  Settings,
-  AccessTime,
-  Description
-} from '@mui/icons-material';
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Home from "./Home";
+import { useState } from "react";
+import LoginCandidat from "./candidat/pages/LoginCandidat";
+import LoginEntreprise from "./entreprise/pages/LoginEntreprise";
+import ProfilEntreprise from "./entreprise/pages/ProfilEntreprise";
+import NavbarEntreprise from "./entreprise/layout/NavbarEntreprise";
+import ListCandidate from "./entreprise/pages/ListCandidate"
+import VoirProfil from "./entreprise/pages/VoirProfil";
+import Filter from "./entreprise/pages/Filter";
+import CalendrierAbsences from "./entreprise/pages/CalendrierAbsences";
+import DemandesConge from "./entreprise/pages/DemandesConge";
+import Configuration from "./entreprise/pages/Configuration";
 
-// Import des composants via l'index
-import {
-  EmployeeListView,
-  CalendarView,
-  CongeView,
-  ConfigView,
-  PointageView,
-  ReleveView,
-  FichePaieView,
-  EmployeeDetailDialog
-} from './components';
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#7e57c2",
+      light: "#b085f5",
+      dark: "#4d2c91",
+      contrastText: "#ffffff",
+    },
+    secondary: {
+      main: "#b085f5",
+      light: "#e1d6ff",
+      dark: "#7e57c2",
+    },
+    background: {
+      default: "#0f0b16",
+      paper: "#1a1525",
+    },
+    text: {
+      primary: "#ffffff",
+      secondary: "rgba(255, 255, 255, 0.7)",
+      disabled: "rgba(255, 255, 255, 0.5)",
+    },
+    divider: "rgba(126, 87, 194, 0.3)",
+    success: {
+      main: "#4caf50",
+      contrastText: "#ffffff",
+    },
+    warning: {
+      main: "#ffa726",
+    },
+    error: {
+      main: "#f44336",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+    },
+    h2: {
+      fontWeight: 600,
+    },
+    h3: {
+      fontWeight: 600,
+    },
+    button: {
+      textTransform: "none",
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "rgba(26, 21, 37, 0.95)",
+          backdropFilter: "blur(20px)",
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#1a1525",
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1a1525",
+          backgroundImage: "none",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "12px",
+          textTransform: "none",
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          borderRadius: "16px",
+        },
+      },
+    },
+  },
+});
 
-// Import des données
-import { employeesData, congeRequests } from './data/mockData';
+function App() {
+  const [user, setUser] = useState({ isConnected: false, type: null });
 
-// Import du thème
-import theme from './theme';
-
-// Configuration du menu
-const menuItems = [
-  { text: 'Employés', icon: <People />, view: 'employees', role: 'rh' },
-  { text: 'Calendrier Absences', icon: <CalendarToday />, view: 'calendar', role: 'rh' },
-  { text: 'Demandes Congé', icon: <CheckCircle />, view: 'conge', role: 'rh' },
-  { text: 'Configuration', icon: <Settings />, view: 'config', role: 'rh' },
-  { text: 'Pointage', icon: <AccessTime />, view: 'pointage', role: 'employee' },
-  { text: 'Relevé Présence', icon: <Description />, view: 'releve', role: 'employee' },
-  { text: 'Fiche de Paie', icon: <Description />, view: 'fiche_paie', role: 'employee' },
-];
-
-const App = () => {
-  const [drawerOpen, setDrawerOpen] = useState(true);
-  const [currentView, setCurrentView] = useState('employees');
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [congeList, setCongeList] = useState(congeRequests);
-
-  const handleViewEmployee = (employee) => {
-    setSelectedEmployee(employee);
-    setDialogOpen(true);
+  const handleLoginEntreprise = () => {
+    setUser({ isConnected: true, type: "entreprise" });
   };
 
-  const handleValidateConge = (id) => {
-    setCongeList(congeList.map(c => c.id === id ? { ...c, statut: 'validé' } : c));
+  const handleLogout = () => {
+    setUser({
+      isConnected: false,
+      type: null
+    })
+  }
+
+  const renderNavbar = () => {
+    if(!user.isConnected) return null;
+    if (user.type === "entreprise") {
+      return (
+        <div position="fixed">
+          <NavbarEntreprise onLogout={handleLogout}/>
+        </div>
+      ) 
+    }
+    return null;
   };
-
-  const renderView = () => {
-    const viewProps = {
-      employees: { onViewEmployee: handleViewEmployee },
-      conge: { congeList, onValidateConge: handleValidateConge },
-      config: {},
-      pointage: {},
-      releve: {},
-      fiche_paie: {},
-      calendar: {}
-    };
-
-    const views = {
-      employees: EmployeeListView,
-      calendar: CalendarView,
-      conge: CongeView,
-      config: ConfigView,
-      pointage: PointageView,
-      releve: ReleveView,
-      fiche_paie: FichePaieView,
-    };
-
-    const ViewComponent = views[currentView];
-    return ViewComponent ? <ViewComponent {...viewProps[currentView]} /> : <EmployeeListView onViewEmployee={handleViewEmployee} />;
-  };
-
-  const renderMenuSection = (role, title) => (
-    <>
-      <Typography variant="overline" sx={{ px: 2, color: 'text.secondary', fontWeight: 600 }}>
-        {title}
-      </Typography>
-      <List>
-        {menuItems.filter(item => item.role === role).map((item) => (
-          <ListItem key={item.view} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              selected={currentView === item.view}
-              onClick={() => setCurrentView(item.view)}
-              sx={{
-                borderRadius: 2,
-                '&.Mui-selected': {
-                  bgcolor: 'primary.main',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                  },
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: currentView === item.view ? 'primary.contrastText' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </>
-  );
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
-        {/* Header */}
-        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={() => setDrawerOpen(!drawerOpen)}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-              Système de Gestion RH
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={3} color="error">
-                <Notifications />
-              </Badge>
-            </IconButton>
-            <Avatar sx={{ ml: 2, bgcolor: 'primary.main' }}>JR</Avatar>
-          </Toolbar>
-        </AppBar>
-
-        {/* Sidebar */}
-        <Drawer
-          variant="persistent"
-          open={drawerOpen}
-          sx={{
-            width: 280,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
-              width: 280,
-              boxSizing: 'border-box',
-              mt: '64px',
-            },
-          }}
-        >
-          <Box sx={{ overflow: 'auto', p: 2 }}>
-            {renderMenuSection('rh', 'Partie RH')}
-            <Divider sx={{ my: 2 }} />
-            {renderMenuSection('employee', 'Partie Employé')}
+      <Box
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #0f0b16 0%, #1a1525 100%)",
+        }}
+      >
+        <Router>
+          {renderNavbar()}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              marginLeft:
+                user.isConnected && user.type === "entreprise" ? "80px" : 0,
+              minHeight: "100vh",
+            }}
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/loginCandidat" element={<LoginCandidat />} />
+              <Route
+                path="/loginEntreprise"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <Navigate to="/profilEntreprise" replace />
+                  ) : (
+                    <LoginEntreprise onLogin={handleLoginEntreprise} />
+                  )
+                }
+              />
+              <Route
+                path="/profilEntreprise"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <ProfilEntreprise />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/listCandidate"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <ListCandidate />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/calendrierAbsences"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <CalendrierAbsences />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/demandesConge"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <DemandesConge />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/configuration"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <Configuration />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/voirprofil"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <VoirProfil />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+              <Route
+                path="/filter"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <Filter />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
+            </Routes>
           </Box>
-        </Drawer>
-
-        {/* Main Content */}
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            mt: '64px',
-            ml: drawerOpen ? 0 : '-280px',
-            transition: theme.transitions.create(['margin'], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
-            }),
-          }}
-        >
-          <Container maxWidth="xl">
-            {renderView()}
-          </Container>
-        </Box>
-
-        {/* Modals */}
-        <EmployeeDetailDialog
-          open={dialogOpen}
-          employee={selectedEmployee}
-          onClose={() => setDialogOpen(false)}
-        />
+        </Router>
       </Box>
     </ThemeProvider>
   );
-};
+}
 
 export default App;
