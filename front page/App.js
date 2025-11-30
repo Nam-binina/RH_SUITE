@@ -180,18 +180,6 @@ function App() {
                   )
                 }
               />
-<Route
-  path="/voirprofil/:id"
-  element={
-    user.isConnected && user.type === "entreprise" ? (
-      <VoirProfil theme={theme} />
-    ) : (
-      <Navigate to="/loginEntreprise" replace />
-    )
-  }
-/>
-
-
               <Route
                 path="/profilEntreprise"
                 element={
@@ -242,17 +230,16 @@ function App() {
                   )
                 }
               />
-<Route
-  path="/voirprofil"
-  element={
-    user.isConnected && user.type === "entreprise" ? (
-      <VoirProfil theme={theme} />
-    ) : (
-      <Navigate to="/loginEntreprise" replace />
-    )
-  }
-/>
-
+              <Route
+                path="/voirprofil"
+                element={
+                  user.isConnected && user.type === "entreprise" ? (
+                    <VoirProfil />
+                  ) : (
+                    <Navigate to="/loginEntreprise" replace />
+                  )
+                }
+              />
               <Route
                 path="/filter"
                 element={

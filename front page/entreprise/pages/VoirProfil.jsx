@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { CircularProgress, Alert } from "@mui/material";
-
-import { useParams } from "react-router-dom";
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -89,21 +85,42 @@ const TwitterIcon = () => (
     <path d="M22.46 6c-.85.38-1.78.64-2.75.76 1-.6 1.76-1.55 2.12-2.68-.93.55-1.96.95-3.06 1.17-.88-.94-2.13-1.53-3.52-1.53-2.67 0-4.83 2.16-4.83 4.83 0 .38.04.75.13 1.1-4.02-.2-7.58-2.13-9.97-5.06-.42.72-.66 1.55-.66 2.44 0 1.68.85 3.16 2.15 4.03-.79-.03-1.54-.24-2.19-.61v.06c0 2.34 1.67 4.29 3.88 4.74-.4.11-.83.17-1.27.17-.31 0-.62-.03-.92-.08.62 1.94 2.42 3.35 4.55 3.39-1.67 1.31-3.77 2.09-6.05 2.09-.39 0-.78-.02-1.17-.07 2.18 1.4 4.77 2.21 7.55 2.21 9.06 0 14.01-7.5 14.01-14.01 0-.21 0-.42-.02-.63.96-.69 1.8-1.56 2.46-2.55z" />
   </svg>
 );
-const VoirProfil = ({ theme }) => {
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+const VoirProfil = () => {
+  const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
-  // Valeurs par défaut pour les attributs qui ne viennent pas du backend
-  const defaultProfile = {
+
+  // Données de profil complètes
+  const profileData = {
+    // Informations de base
+    firstName: "Alexandre",
+    lastName: "Dupont",
     title: "Développeur Full Stack Senior",
     company: "Tech Innovation Inc.",
     avatar: null,
     coverImage: null,
+
+    // Statut
     status: "Actif",
     verified: true,
     premium: true,
+
+    // Coordonnées
+    email: "alexandre.dupont@email.com",
+    phone: "+33 6 12 34 56 78",
+    location: "Paris, France",
     website: "www.alexandredupont.dev",
+
+    // Professionnel
+    experience: "8 ans",
+    education: "Master en Informatique",
+    joinDate: "Janvier 2020",
+    department: "Développement Web",
+
+    // Bio
+    bio: "Passionné par le développement web et les nouvelles technologies. Spécialisé dans React, Node.js et l'architecture cloud. J'aime créer des solutions innovantes et partager mes connaissances avec la communauté.",
+
+    // Compétences avec niveaux
     skills: [
       { name: "React", level: 95 },
       { name: "Node.js", level: 90 },
@@ -114,23 +131,47 @@ const VoirProfil = ({ theme }) => {
       { name: "MongoDB", level: 78 },
       { name: "GraphQL", level: 75 },
     ],
+
+    // Réalisations
     achievements: [
-      { title: "Contributeur Star", icon: "⭐", description: "Plus de 1000 contributions" },
-      { title: "Mentor Expert", icon: "🎓", description: "Formation de 50+ développeurs" },
-      { title: "Innovation Award", icon: "🏆", description: "Prix de l'innovation 2024" },
-      { title: "Open Source Hero", icon: "💻", description: "20+ projets open source" },
+      {
+        title: "Contributeur Star",
+        icon: "⭐",
+        description: "Plus de 1000 contributions",
+      },
+      {
+        title: "Mentor Expert",
+        icon: "🎓",
+        description: "Formation de 50+ développeurs",
+      },
+      {
+        title: "Innovation Award",
+        icon: "🏆",
+        description: "Prix de l'innovation 2024",
+      },
+      {
+        title: "Open Source Hero",
+        icon: "💻",
+        description: "20+ projets open source",
+      },
     ],
+
+    // Statistiques
     stats: {
       projects: 127,
       commits: 5420,
       reviews: 890,
       followers: 1234,
     },
+
+    // Réseaux sociaux
     social: {
       github: "github.com/alexandre-dupont",
       linkedin: "linkedin.com/in/alexandre-dupont",
       twitter: "@alex_dupont_dev",
     },
+
+    // Projets récents
     recentProjects: [
       {
         name: "E-Commerce Platform",
@@ -151,11 +192,15 @@ const VoirProfil = ({ theme }) => {
         tech: ["Swift", "Firebase", "GraphQL"],
       },
     ],
+
+    // Langues
     languages: [
       { name: "Français", level: "Natif" },
       { name: "Anglais", level: "Courant" },
       { name: "Espagnol", level: "Intermédiaire" },
     ],
+
+    // Certifications
     certifications: [
       "AWS Certified Solutions Architect",
       "Google Cloud Professional",
@@ -163,45 +208,6 @@ const VoirProfil = ({ theme }) => {
     ],
   };
 
-const { id } = useParams();
-
-useEffect(() => {
-  axios
-    .get(`http://localhost:8181/api/candidats/${id}`)
-    .then((res) => {
-      const data = res.data;
-      const profile = {
-        ...defaultProfile,
-        firstName: data.prenom || "",
-        lastName: data.nom || "",
-        email: data.email || "",
-        phone: data.numero || "",
-        location: data.adresse || "",
-        experience: data.experience || "",
-        education: data.education || "",
-        joinDate: data.joinDate || "",
-        department: data.department || "",
-        bio: data.bio || "",
-        skills: data.skills?.length > 0 ? data.skills : defaultProfile.skills,
-        achievements: data.achievements?.length > 0 ? data.achievements : defaultProfile.achievements,
-        stats: Object.keys(data.stats || {}).length > 0 ? data.stats : defaultProfile.stats,
-        social: Object.keys(data.social || {}).length > 0 ? data.social : defaultProfile.social,
-        recentProjects: data.recentProjects?.length > 0 ? data.recentProjects : defaultProfile.recentProjects,
-        languages: data.languages?.length > 0 ? data.languages : defaultProfile.languages,
-        certifications: data.certifications?.length > 0 ? data.certifications : defaultProfile.certifications,
-      };
-      setProfileData(profile);
-      setLoading(false);
-    })
-    .catch((err) => {
-      console.error(err);
-      setError("Erreur lors du chargement du profil");
-      setLoading(false);
-    });
-}, [id]);
-if (loading) return <CircularProgress />;
-if (error) return <Alert severity="error">{error}</Alert>;
-if (!profileData) return null;
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };

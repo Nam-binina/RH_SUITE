@@ -1,112 +1,44 @@
-import { useTheme, Typography, Container, Box } from "@mui/material";
+import { useTheme, Typography, Container, Box, CircularProgress, Alert } from "@mui/material";
 import GridBoxList from "../layout/GridBoxList";
 import { FilterList } from "@mui/icons-material";
 import { ModernButton } from "../layout/ModernButton";
 import { useNavigate } from "react-router-dom";
-
-// Données d'exemple pour la grille
-const gridItems = [
-  {
-    id: 1,
-    title: "Tsiry Hasina",
-    subtitle: "Developper React",
-    description:
-      "Je suis developper react qui vient d'avoir la licence ITU Concernant le developpeur web.",
-    tags: ["React", "Material-UI", "Laravel", "Springboot", "Java"],
-    date: "15 Sept 2024",
-    isFavorite: true,
-    image: null,
-  },
-  {
-    id: 2,
-    title: "Node.js API",
-    subtitle: "Backend e-commerce",
-    description:
-      "API REST complète pour plateforme e-commerce avec authentification JWT, paiements Stripe et notifications push.",
-    tags: ["Node.js", "Express", "MongoDB", "Stripe"],
-    date: "12 Sept 2024",
-    status: "En cours",
-    isFavorite: false,
-    image: null,
-  },
-  {
-    id: 3,
-    title: "Flutter ListCandidate",
-    subtitle: "ListCandidate mobile bien-être",
-    description:
-      "Application de méditation avec suivi habitudes, méditations guidées, stats personnalisées et synchronisation cloud.",
-    tags: ["Flutter", "Dart", "Firebase", "SQLite"],
-    date: "8 Sept 2024",
-    status: "Terminé",
-    isFavorite: true,
-    image: null,
-  },
-  {
-    id: 4,
-    title: "ML Pipeline",
-    subtitle: "Analyse prédictive",
-    description:
-      "Pipeline machine learning pour prédiction tendances vente avec preprocessing automatique et modèles ensemble.",
-    tags: ["Python", "TensorFlow", "Docker", "AWS"],
-    date: "5 Sept 2024",
-    status: "Active",
-    isFavorite: false,
-    image: null,
-  },
-  {
-    id: 5,
-    title: "Design System",
-    subtitle: "Bibliothèque composants",
-    description:
-      "Système design complet avec composants réutilisables, documentation Storybook et thèmes personnalisables.",
-    tags: ["Figma", "Storybook", "CSS", "React"],
-    date: "1 Sept 2024",
-    status: "En cours",
-    isFavorite: true,
-    image: null,
-  },
-  {
-    id: 6,
-    title: "Vue.js SPA",
-    subtitle: "Application Single Page",
-    description:
-      "SPA moderne avec Vue 3, Composition API, gestion d'état Pinia et interface utilisateur intuitive.",
-    tags: ["Vue.js", "Pinia", "Vite", "Tailwind"],
-    date: "28 Août 2024",
-    status: "Active",
-    isFavorite: false,
-    image: null,
-  },
-  {
-    id: 7,
-    title: "DevOps Pipeline",
-    subtitle: "CI/CD automatisé",
-    description:
-      "Pipeline DevOps complet avec tests automatisés, déploiement continu et monitoring application.",
-    tags: ["Docker", "Kubernetes", "GitHub Actions"],
-    date: "25 Août 2024",
-    status: "Terminé",
-    isFavorite: true,
-    image: null,
-  },
-  {
-    id: 8,
-    title: "PWA Weather",
-    subtitle: "ListCandidate météo progressive",
-    description:
-      "Progressive Web ListCandidate météo avec géolocalisation, notifications push et mode hors-ligne complet.",
-    tags: ["PWA", "Service Workers", "Weather API"],
-    date: "20 Août 2024",
-    status: "Active",
-    isFavorite: false,
-    image: null,
-  },
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function ListCandidate() {
   const theme = useTheme();
-
   const navigate = useNavigate();
+
+  const [gridItems, setGridItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Récupération dynamique des candidats depuis l'API
+  useEffect(() => {
+    axios
+      .get("http://localhost:8181/api/candidats")
+      .then((response) => {
+        setGridItems(
+          response.data.map((candidat) => ({
+            id: candidat.id,
+            title: `${candidat.nom} ${candidat.prenom}`,
+            subtitle: "Candidat",
+            description: `Email: ${candidat.email} - Tel: ${candidat.numero}`,
+            tags: [], // ajouter des tags dynamiques si besoin
+            date: candidat.dateNaissance,
+            isFavorite: false,
+            image: null,
+          }))
+        );
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Erreur lors du chargement des candidats.");
+        setLoading(false);
+      });
+  }, []);
 
   const handleItemClick = (item) => {
     console.log("Item cliqué:", item);
@@ -114,12 +46,10 @@ function ListCandidate() {
 
   const handleFilter = () => {
     navigate("/filter");
-    console.log("filtre cliqué");
   };
 
   const handleItemVoirProfil = (item) => {
-    navigate("/voirprofil");
-    console.log("Voir Profil item:", item);
+    navigate(`/voirprofil/${item.id}`);
   };
 
   const handleItemToggleFavorite = (item) => {
@@ -139,7 +69,7 @@ function ListCandidate() {
           WebkitTextFillColor: "transparent",
         }}
       >
-        Listes des candidats
+        Liste des candidats
       </Typography>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, margin: 3 }}>
@@ -152,16 +82,21 @@ function ListCandidate() {
         </ModernButton>
       </Box>
 
-      <GridBoxList
-        items={gridItems}
-        onItemClick={handleItemClick}
-        onItemEdit={handleItemVoirProfil}
-        onItemToggleFavorite={handleItemToggleFavorite}
-        showActions={true}
-        showAvatar={true}
-        showChips={true}
-        showImage={false}
-      />
+      {loading && <CircularProgress />}
+      {error && <Alert severity="error">{error}</Alert>}
+
+      {!loading && !error && (
+        <GridBoxList
+          items={gridItems}
+          onItemClick={handleItemClick}
+          onItemEdit={handleItemVoirProfil}
+          onItemToggleFavorite={handleItemToggleFavorite}
+          showActions={true}
+          showAvatar={true}
+          showChips={true}
+          showImage={false}
+        />
+      )}
     </Container>
   );
 }

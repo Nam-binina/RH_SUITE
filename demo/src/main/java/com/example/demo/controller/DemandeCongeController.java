@@ -1,23 +1,21 @@
 package com.example.demo.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.demo.model.DemandeConge;
-import com.example.demo.service.DemandeCongeService;
 import com.example.demo.model.Employer;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.service.DemandeCongeService;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.time.LocalDate;
-import java.util.List;
-
-
 @RestController
-@RequestMapping("/demandes-conge")
+@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api/demandes-conge")
 public class DemandeCongeController {
+
     private final DemandeCongeService demandeCongeService;
 
     public DemandeCongeController(DemandeCongeService demandeCongeService) {
@@ -28,20 +26,45 @@ public class DemandeCongeController {
     public List<DemandeConge> getDemandesConge(@RequestParam String statut) {
         return demandeCongeService.findByStatut(statut);
     }
-    
-    @GetMapping("/validate")
-    public DemandeConge validate(@RequestParam int demande) {
-        DemandeConge d = demandeCongeService.findById(demande);
-        if (d != null) {
-            return demandeCongeService.validate(d);
+
+    // Correction : id dans l'URL + action/commentaire en params
+    @GetMapping("/validate/{id}")
+    public ResponseEntity<DemandeConge> validate(
+            @PathVariable("id") int id,
+            @RequestParam String action,
+            @RequestParam(required = false) String commentaire) {
+
+        DemandeConge demande = demandeCongeService.findById(id);
+        if (demande == null) {
+            return ResponseEntity.notFound().build();
         }
-        return null;
+
+        if ("valider".equalsIgnoreCase(action)) {
+            demande = demandeCongeService.validate(demande, commentaire);
+        } else if ("rejeter".equalsIgnoreCase(action)) {
+            demande = demandeCongeService.reject(demande, commentaire);
+        }
+
+        return ResponseEntity.ok(demande);
     }
-    
+
     @PostMapping("/create")
-    public DemandeConge createDemandesConge(@RequestParam String statut, @RequestParam int typeConge,
-        @RequestParam LocalDate debut, @RequestParam LocalDate fin, @RequestParam String motif,HttpSession session) {
-        Employer e = (Employer) session.getAttribute("employer");
-        return demandeCongeService.createConge(statut, typeConge, debut, fin, motif, e);
+    public ResponseEntity<DemandeConge> createDemandesConge(
+            @RequestParam String statut,
+            @RequestParam int typeConge,
+            @RequestParam LocalDate debut,
+            @RequestParam LocalDate fin,
+            @RequestParam String motif,
+            HttpSession session) {
+
+        Employer employer = (Employer) session.getAttribute("employer");
+        if (employer == null) {
+            return ResponseEntity.status(401).build(); 
+        }
+
+        DemandeConge demande = demandeCongeService.createConge(
+                statut, typeConge, debut, fin, motif, employer);
+
+        return ResponseEntity.ok(demande);
     }
 }

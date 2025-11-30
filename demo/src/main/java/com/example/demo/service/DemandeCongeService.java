@@ -18,4 +18,6 @@ public interface DemandeCongeService {
     DemandeConge createConge(String s, int typeConge, LocalDate debut, LocalDate fin, String motif, Employer emp);
 
     DemandeConge validate(DemandeConge demande);
+    DemandeConge validate(DemandeConge demande, String commentaire);
+    DemandeConge reject(DemandeConge demande, String commentaire);
 }

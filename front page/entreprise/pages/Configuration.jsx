@@ -1,13 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import {
-  Box, Card, CardContent, Typography, TextField, Button,
-  MenuItem, Alert, Grid, Divider, Paper, Stack, InputAdornment
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  MenuItem,
+  Alert,
+  Grid,
+  Divider,
+  Paper,
+  Stack,
+  InputAdornment,
 } from '@mui/material';
-import { Settings, Save, Info, TrendingUp, AccountBalance, LocalHospital, Receipt, Calculate } from '@mui/icons-material';
+import {
+  Settings,
+  Save,
+  Info,
+  TrendingUp,
+  AccountBalance,
+  LocalHospital,
+  Receipt,
+  Calculate,
+} from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-// -- Ton thème MUI existant
 
 const theme = createTheme({
   palette: {
@@ -88,7 +105,6 @@ const theme = createTheme({
   },
 });
 
-
 const Configuration = () => {
   const [selectedTaux, setSelectedTaux] = useState('cnaps');
   const [tauxValue, setTauxValue] = useState('');
@@ -100,40 +116,63 @@ const Configuration = () => {
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
 
   const tauxOptions = [
-    { value: 'cnaps', label: 'CNAPS', fullName: 'Caisse Nationale de Prévoyance Sociale', description: 'Cotisation sociale obligatoire', icon: <AccountBalance /> },
-    { value: 'ostie', label: 'OSTIE', fullName: 'Organisme Sanitaire Tananarivien Inter-Entreprises', description: 'Cotisation de santé', icon: <LocalHospital /> },
-    { value: 'irsa', label: 'IRSA', fullName: 'Impôt sur les Revenus Salariaux et Assimilés', description: 'Impôt sur le revenu', icon: <Receipt /> },
+    {
+      value: 'cnaps',
+      label: 'CNAPS',
+      fullName: 'Caisse Nationale de Prévoyance Sociale',
+      description: 'Cotisation sociale obligatoire',
+      icon: <AccountBalance />,
+    },
+    {
+      value: 'ostie',
+      label: 'OSTIE',
+      fullName: 'Organisme Sanitaire Tananarivien Inter-Entreprises',
+      description: 'Cotisation de santé',
+      icon: <LocalHospital />,
+    },
+    {
+      value: 'irsa',
+      label: 'IRSA',
+      fullName: 'Impôt sur les Revenus Salariaux et Assimilés',
+      description: 'Impôt sur le revenu',
+      icon: <Receipt />,
+    },
   ];
-
-  // --- Récupération depuis le backend
-  useEffect(() => {
-    axios.get('http://localhost:8181/api/config/taux')
-      .then(res => setTauxConfig(res.data))
-      .catch(err => console.error('Erreur récupération taux :', err));
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!tauxValue || parseFloat(tauxValue) < 0 || parseFloat(tauxValue) > 100) {
-      setNotification({ open: true, message: 'Veuillez entrer un taux valide entre 0 et 100', type: 'error' });
+      setNotification({
+        open: true,
+        message: 'Veuillez entrer un taux valide entre 0 et 100',
+        type: 'error',
+      });
       return;
     }
 
     const newTaux = parseFloat(tauxValue) / 100;
+    setTauxConfig({
+      ...tauxConfig,
+      [selectedTaux]: newTaux,
+    });
 
-    // --- Appel POST au backend
-    axios.post('http://localhost:8181/api/config/taux', null, { params: { type: selectedTaux, taux: newTaux } })
-      .then(res => {
-        setTauxConfig(prev => ({ ...prev, [selectedTaux]: newTaux }));
-        setNotification({ open: true, message: res.data, type: 'success' });
-        setTauxValue('');
-        setTimeout(() => setNotification({ open: false, message: '', type: 'success' }), 4000);
-      })
-      .catch(err => {
-        console.error(err);
-        setNotification({ open: true, message: 'Erreur mise à jour taux', type: 'error' });
-      });
+    const optionLabel = tauxOptions.find((t) => t.value === selectedTaux).label;
+    setNotification({
+      open: true,
+      message: `Le taux ${optionLabel} a été mis à jour avec succès à ${tauxValue}%`,
+      type: 'success',
+    });
+
+    setTauxValue('');
+
+    setTimeout(() => {
+      setNotification({ open: false, message: '', type: 'success' });
+    }, 4000);
+  };
+
+  const getCurrentOption = () => {
+    return tauxOptions.find((t) => t.value === selectedTaux);
   };
 
   // Exemple de calcul
@@ -144,7 +183,14 @@ const Configuration = () => {
   const totalRetenues = cnapsAmount + ostieAmount + irsaAmount;
   const salaireNet = salaireBrut - totalRetenues;
 
-  const formatCurrency = (amount) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MGA', minimumFractionDigits: 0 }).format(amount);
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'MGA',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <ThemeProvider theme={theme}>

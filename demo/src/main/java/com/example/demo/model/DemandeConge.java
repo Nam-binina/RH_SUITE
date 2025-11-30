@@ -37,6 +37,16 @@ public class DemandeConge {
     private Integer idValidateur;
 
     private String statut;
+@Transient
+private Employer employe;
+
+public Employer getEmploye() {
+    return employe;
+}
+
+public void setEmploye(Employer employe) {
+    this.employe = employe;
+}
 
     @Column(name = "date_demande")
     private LocalDateTime dateDemande;
@@ -137,6 +147,16 @@ public class DemandeConge {
     public void setDateValidation(LocalDateTime dateValidation) {
         this.dateValidation = dateValidation;
     }
+@Transient
+private TypeConge typeConge;
+
+public TypeConge getTypeConge() {
+    return typeConge;
+}
+
+public void setTypeConge(TypeConge typeConge) {
+    this.typeConge = typeConge;
+}
 
     public String getCommentaireValidation() {
         return commentaireValidation;

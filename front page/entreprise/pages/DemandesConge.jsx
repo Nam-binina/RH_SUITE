@@ -89,34 +89,31 @@ const DemandeConge = () => {
     setActionType('');
   };
 
-const handleValidation = async () => {
-  if (!selectedDemande) return;
+  const handleValidation = async () => {
+    if (!selectedDemande) return;
+    const newStatut = actionType === 'valider' ? 'VALIDE' : 'REJETE';
+    try {
+      // Appel backend pour valider/rejeter la demande
+      const response = await axios.get('http://localhost:8181/api/demandes-conge/validate', { 
+        params: { demande: selectedDemande.id }
+      });
+      const updatedDemande = response.data;
 
-  try {
-    const response = await axios.get(`http://localhost:8181/api/demandes-conge/validate/${selectedDemande.id}`, {
-      params: { 
-        action: actionType, 
-        commentaire: commentaire 
-      }
-    });
-    const updatedDemande = response.data;
+      setDemandes(demandes.map(d => d.id === updatedDemande.id ? updatedDemande : d));
 
-    setDemandes(demandes.map(d => d.id === updatedDemande.id ? updatedDemande : d));
+      setNotification({
+        open: true,
+        message: `Demande ${actionType === 'valider' ? 'validée' : 'rejetée'} avec succès`,
+        type: actionType === 'valider' ? 'success' : 'info'
+      });
 
-    setNotification({
-      open: true,
-      message: `Demande ${actionType === 'valider' ? 'validée' : 'rejetée'} avec succès`,
-      type: actionType === 'valider' ? 'success' : 'info'
-    });
-
-    handleCloseDialog();
-    setTimeout(() => setNotification({ open: false, message: '', type: '' }), 3000);
-  } catch (error) {
-    console.error('Erreur validation:', error);
-    setNotification({ open: true, message: 'Erreur lors de la validation', type: 'error' });
-  }
-};
-
+      handleCloseDialog();
+      setTimeout(() => setNotification({ open: false, message: '', type: '' }), 3000);
+    } catch (error) {
+      console.error('Erreur validation:', error);
+      setNotification({ open: true, message: 'Erreur lors de la validation', type: 'error' });
+    }
+  };
 
   const getTypeColor = (type) => {
     switch(type) {

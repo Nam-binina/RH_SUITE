@@ -23,6 +23,16 @@ public class TypeConge {
     public Integer getId() {
         return id;
     }
+@Transient
+private TypeConge typeConge;
+
+public TypeConge getTypeConge() {
+    return typeConge;
+}
+
+public void setTypeConge(TypeConge typeConge) {
+    this.typeConge = typeConge;
+}
 
     public void setId(Integer id) {
         this.id = id;
