@@ -17,6 +17,8 @@
             -select (cnaps,ostie,irsa)
             -une input taux
             -un bouton submit pour modifer les taux
+
+            
         B-Partie employer
         1-Pointage de presence
             -Une input date pour le jour du pointage
