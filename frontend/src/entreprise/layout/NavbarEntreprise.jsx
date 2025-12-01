@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Campaign, ListAlt } from "@mui/icons-material";
+
 import {
   Box,
   styled,
@@ -11,21 +13,14 @@ import {
 } from "@mui/material";
 import { Business, People, Logout, CalendarToday, HourglassEmpty, RateReview } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-
 const StyledTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   "& .MuiTooltip-tooltip": {
     background:
       theme.palette.mode === "dark"
-        ? `linear-gradient(135deg, ${alpha("#1a1525", 0.9)}, ${alpha(
-            "#2d2740",
-            0.9
-          )})`
-        : `linear-gradient(135deg, ${alpha("#ffffff", 0.9)}, ${alpha(
-            "#f8f9fa",
-            0.9
-          )})`,
+        ? `linear-gradient(135deg, ${alpha("#1a1525", 0.9)}, ${alpha("#2d2740", 0.9)})`
+        : `linear-gradient(135deg, ${alpha("#ffffff", 0.9)}, ${alpha("#f8f9fa", 0.9)})`,
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
     color: theme.palette.mode === "dark" ? "#ffffff" : "#1a1a1a",
@@ -35,7 +30,7 @@ const StyledTooltip = styled(({ className, ...props }) => (
     borderRadius: "12px",
     boxShadow:
       theme.palette.mode === "dark"
-  export default function NavbarEntreprise({ onLogout }) {
+        ? "0 8px 8px rgba(0, 0, 0, 0.5)"
         : "0 8px 8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)",
     border: `1px solid ${alpha(
       theme.palette.mode === "dark" ? "#7e57c2" : "#000000",
@@ -52,17 +47,16 @@ const StyledTooltip = styled(({ className, ...props }) => (
       left: 0,
       right: 0,
       bottom: 0,
-      background: `linear-gradient(135deg, ${alpha(
-        "#7e57c2",
-        0.1
-      )}, transparent)`,
+      background: `linear-gradient(135deg, ${alpha("#7e57c2", 0.1)}, transparent)`,
       borderRadius: "12px",
       pointerEvents: "none",
     },
   },
+
   "& .MuiTooltip-tooltip[data-popper-placement^='right']": {
     animation: "slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
   },
+
   "@keyframes slideInRight": {
     "0%": {
       opacity: 0,

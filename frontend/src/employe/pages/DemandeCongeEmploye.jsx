@@ -39,7 +39,7 @@ export default function DemandeCongeEmploye() {
       setTypeConge(1); setDebut(''); setFin(''); setMotif('');
     } catch (e) {
       console.error(e);
-      setError('Erreur lors de l'envoi de la demande.');
+      setError('Erreur lors de l\'envoi de la demande');
     } finally {
       setLoading(false);
     }
