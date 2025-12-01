@@ -11,6 +11,7 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 function Pointage() {
   // STATES
@@ -19,23 +20,33 @@ function Pointage() {
   const [sortie, setSortie] = useState("");
   const [pauseDebut, setPauseDebut] = useState("");
   const [pauseFin, setPauseFin] = useState("");
-  const goTableaudebord = () => navigate("/tableaudebordEmploye");
   const theme = useTheme();
   const navigate = useNavigate();
+  const goTableaudebord = () => navigate("/tableaudebordEmploye");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
 
-    const data = {
-      datePointage,
-      entree,
-      sortie,
-      pauseDebut,
-      pauseFin,
+    const payload = {
+      idEmploye: id,
+      datePointage: datePointage,
+      heureEntree: entree,
+      heureSortie: sortie,
+      pauseDebut: pauseDebut,
+      pauseFin: pauseFin,
     };
 
-    console.log("Pointage soumis :", data);
-    alert("Pointage envoyé (front uniquement)");
+    api.post(`/pointages`, payload)
+      .then(res => {
+        alert('Pointage enregistré');
+        navigate('/tableaudebordEmploye');
+      })
+      .catch(err => {
+        console.error('Erreur enregistrement pointage', err);
+        alert('Erreur lors de l\'enregistrement du pointage');
+      });
   };
 
   return (

@@ -12,6 +12,7 @@ import {
 
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 function RelevePresence() {
   const [dateReleve, setDateReleve] = useState("");
@@ -22,17 +23,31 @@ function RelevePresence() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Relevé demandé pour la date :", dateReleve);
+    try {
+      const date = new Date(dateReleve);
+      const mois = date.getMonth() + 1;
+      const annee = date.getFullYear();
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      const id = user?.id || 1;
 
-    // Simulation du téléchargement PDF
-    const fakePDF =
-      "data:application/pdf;base64,JVBERi0xLjQKJeLjz9MK..."; // fichier fictif
-    const link = document.createElement("a");
-    link.href = fakePDF;
-    link.download = `releve_presence_${dateReleve}.pdf`;
-    link.click();
-
-    alert("Relevé PDF généré (simulation front)");
+      api.get(`/releves-presence/employe/${id}/pdf-download`, { params: { mois, annee }, responseType: 'blob' })
+        .then(res => {
+          const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `releve_${mois}_${annee}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch(err => {
+          console.error('Erreur génération relevé', err);
+          alert('Impossible de générer le relevé depuis le serveur.');
+        });
+    } catch (err) {
+      console.error(err);
+      alert('Date invalide');
+    }
   };
 
   return (

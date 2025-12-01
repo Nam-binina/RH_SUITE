@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -36,17 +36,9 @@ const TableaudebordEmploye = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  // Données employé
-  const [employeData] = useState({
-    prenom: "Tendry",
-    nom: "Rakoto",
-    poste: "Développeur Fullstack",
-    photo: "https://via.placeholder.com/80",
-    deconnexionEmployeRestants: 14,
-    heuresSemaine: 38,
-    heuresMois: 160,
-    pointage: 1,
-  });
+  // Données employé (depuis backend)
+  const [employeData, setEmployeData] = useState(null);
+  const [stats, setStats] = useState({ heuresSemaine: 0, heuresMois: 0, pointage: 0 });
 
   // Alertes RH (exemples)
   const alertes = [
@@ -65,6 +57,28 @@ const TableaudebordEmploye = () => {
     localStorage.removeItem("user");
     navigate("/login");
   };
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
+    import("../api/api").then(({ default: api }) => {
+      api.get(`/employers/${id}`)
+        .then(res => setEmployeData(res.data))
+        .catch(() => setEmployeData(null));
+
+      const now = new Date();
+      api.get(`/pointages/employe/${id}/statistiques`, { params: { mois: now.getMonth() + 1, annee: now.getFullYear() } })
+        .then(res => {
+          const d = res.data || {};
+          setStats({
+            heuresSemaine: d.heuresSemaine || d.totalHeuresSemaine || 0,
+            heuresMois: d.heuresMois || d.totalHeuresMois || d.totalHours || 0,
+            pointage: d.pointagesCount || d.pointage || 0,
+          });
+        })
+        .catch(() => {});
+    });
+  }, []);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: theme.palette.background.default }}>
@@ -131,7 +145,7 @@ const TableaudebordEmploye = () => {
         {/* Header */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4, alignItems: "center" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar src={employeData.photo} sx={{ width: 80, height: 80 }} />
+            <Avatar src={employeData?.photo || "https://via.placeholder.com/80"} sx={{ width: 80, height: 80 }} />
             <Box>
               <Typography
                 variant="h4"
@@ -143,10 +157,10 @@ const TableaudebordEmploye = () => {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Bonjour {employeData.prenom}
+                Bonjour {employeData?.prenom || "Utilisateur"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Poste : {employeData.poste}
+                Poste : {employeData?.poste || "-"}
               </Typography>
             </Box>
           </Box>
@@ -178,9 +192,9 @@ const TableaudebordEmploye = () => {
               <Typography variant="h6" fontWeight={700}>
                 Heures cette semaine
               </Typography>
-              <Typography variant="h4" sx={{ mt: 1 }}>
-                {employeData.heuresSemaine}h
-              </Typography>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                {stats.heuresSemaine}h
+                </Typography>
             </CardContent>
           </Card>
 
@@ -190,9 +204,9 @@ const TableaudebordEmploye = () => {
               <Typography variant="h6" fontWeight={700}>
                 Heures ce mois
               </Typography>
-              <Typography variant="h4" sx={{ mt: 1 }}>
-                {employeData.heuresMois}h
-              </Typography>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                {stats.heuresMois}h
+                </Typography>
             </CardContent>
           </Card>
 
@@ -202,9 +216,9 @@ const TableaudebordEmploye = () => {
               <Typography variant="h6" fontWeight={700}>
                 Congés restants
               </Typography>
-              <Typography variant="h4" sx={{ mt: 1 }}>
-                {employeData.deconnexionEmployeRestants} jours
-              </Typography>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                {employeData?.congesRestants ?? 14} jours
+                </Typography>
             </CardContent>
           </Card>
 
@@ -214,9 +228,9 @@ const TableaudebordEmploye = () => {
               <Typography variant="h6" fontWeight={700}>
                 pointage ce mois
               </Typography>
-              <Typography variant="h4" sx={{ mt: 1 }}>
-                {employeData.pointage}
-              </Typography>
+                <Typography variant="h4" sx={{ mt: 1 }}>
+                {stats.pointage}
+                </Typography>
             </CardContent>
           </Card>
 

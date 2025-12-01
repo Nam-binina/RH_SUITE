@@ -1,32 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import api from "../api/api";
 
 const MesDocuments = () => {
-  const documents = [
-    {
-      titre: "Fiche de paie – Janvier 2025",
-      type: "PDF",
-      date: "05/02/2025",
-      lien: "#"
-    },
-    {
-      titre: "Fiche de paie – Février 2025",
-      type: "PDF",
-      date: "05/03/2025",
-      lien: "#"
-    },
-    {
-      titre: "Relevé de présence – Janvier 2025",
-      type: "PDF",
-      date: "01/02/2025",
-      lien: "#"
-    },
-    {
-      titre: "Contrat de travail (CDD 12 mois)",
-      type: "PDF",
-      date: "12/08/2024",
-      lien: "#"
-    }
-  ];
+  const [documents, setDocuments] = useState([]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
+    api.get(`/documents/employe/${id}`)
+      .then(res => setDocuments(res.data || []))
+      .catch(err => {
+        console.error('Erreur chargement documents', err);
+        setDocuments([]);
+      });
+  }, []);
+
+  const download = (doc) => {
+    api.get(`/documents/${doc.id}/download`, { responseType: 'blob' })
+      .then(res => {
+        const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const filename = doc.nomFichier || (`document_${doc.id}`);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(err => {
+        console.error('Erreur téléchargement', err);
+        alert('Impossible de télécharger le document');
+      });
+  };
+
+  const exportXlsx = () => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
+    api.get(`/documents/employe/${id}/export-xlsx`, { responseType: 'blob' })
+      .then(res => {
+        const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `documents_employe_${id}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(err => {
+        console.error('Erreur export xlsx', err);
+        alert('Impossible d\'exporter les documents');
+      });
+  };
 
   return (
     <div className="documents-container">
@@ -100,15 +126,22 @@ const MesDocuments = () => {
 
       <h2>Mes Documents</h2>
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ margin: 0 }}>Mes documents ({documents.length})</h3>
+        <div>
+          <button className="btn-download" onClick={exportXlsx} style={{ marginRight: 8 }}>Exporter XLSX</button>
+        </div>
+      </div>
+
       <div className="doc-grid">
-        {documents.map((doc, index) => (
-          <div className="doc-card" key={index}>
-            <div className="doc-title">{doc.titre}</div>
+        {documents.map((doc) => (
+          <div className="doc-card" key={doc.id}>
+            <div className="doc-title">{doc.nomFichier || (`Document ${doc.id}`)}</div>
             <div className="doc-info">
-              Type : {doc.type} <br />
-              Date : {doc.date}
+              Type : {doc.typeDocument || '—'} <br />
+              Date : {doc.dateUpload ? new Date(doc.dateUpload).toLocaleString() : '—'}
             </div>
-            <button className="btn-download">Télécharger</button>
+            <button className="btn-download" onClick={() => download(doc)}>Télécharger</button>
           </div>
         ))}
       </div>

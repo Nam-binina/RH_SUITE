@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -35,7 +35,20 @@ function FichePaie() {
   const [mois, setMois] = useState("Janvier");
   const [annee, setAnnee] = useState(currentYear);
   const [filtreValide, setFiltreValide] = useState(false);
+  const [fiche, setFiche] = useState(null);
   const goTableaudebord = () => navigate("/tableaudebordEmploye");
+
+  useEffect(() => {
+    if (!filtreValide) return;
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
+    const moisIndex = moisListe.indexOf(mois) + 1;
+    import("../api/api").then(({ default: api }) => {
+      api.get(`/fiche-paie/employe/${id}/mois/${moisIndex}/annee/${annee}`)
+        .then(res => setFiche(res.data))
+        .catch(() => setFiche(null));
+    });
+  }, [filtreValide]);
 
   // ------------------------- DONNÉES EXEMPLE -----------------------
   const employe = {
@@ -140,9 +153,9 @@ function FichePaie() {
           Génération de la fiche de paie
         </Typography>
 
-        <Typography sx={{ mb: 3, color: "#666", fontSize: "15px" }}>
+          <Typography sx={{ mb: 3, color: "#666", fontSize: "15px" }}>
           Sélectionnez le mois et l'année.  
-          La fiche affichera **les éléments exacts de rémunération** du mois choisi.
+          La fiche affichera **les éléments exacts de rémunération** du mois choisi (si disponible sur le serveur).
         </Typography>
 
         <Box display="flex" gap={3} alignItems="center">
@@ -180,7 +193,7 @@ function FichePaie() {
       </Card>
 
       {/* ---------------------------- FICHE ---------------------------- */}
-      {filtreValide && (
+          {filtreValide && (
         <Card
           sx={{
             p: 4,
@@ -193,13 +206,21 @@ function FichePaie() {
           </Typography>
 
           <Typography sx={{ mb: 3, color: "#555", fontSize: "18px" }}>
-            {mois} {annee}
+            {mois} {annee} {fiche ? "(données serveur)" : "(calcul local)"}
           </Typography>
 
           <Divider sx={{ mb: 3 }} />
 
           <Table>
-            <TableBody>
+              <TableBody>
+
+              {fiche && (
+                <TableRow>
+                  <TableCell colSpan={2} sx={{ color: "#2e7d32", fontWeight: 700 }}>
+                    Fiche récupérée depuis le serveur
+                  </TableCell>
+                </TableRow>
+              )}
 
               {/* ---------------- SOCIÉTÉ ---------------- */}
               <TableRow>
@@ -249,21 +270,21 @@ function FichePaie() {
 
               <TableRow>
                 <TableCell>Salaire de base</TableCell>
-                <TableCell align="right">{employe.salaireBase.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.salaireBase ?? employe.salaireBase).toLocaleString()}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Primes</TableCell>
-                <TableCell align="right">{employe.primes.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.primes ?? employe.primes).toLocaleString()}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Indemnités</TableCell>
-                <TableCell align="right">{employe.indemnite.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.indemnites ?? employe.indemnite).toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Total Brut</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
-                  {salaireBrut.toLocaleString()}
+                  {(fiche?.totalBrut ?? salaireBrut).toLocaleString()}
                 </TableCell>
               </TableRow>
 
@@ -276,11 +297,11 @@ function FichePaie() {
 
               <TableRow>
                 <TableCell>HS 30% ({employe.heuresSup30}h)</TableCell>
-                <TableCell align="right">{HS_30.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.hs30 ?? HS_30).toLocaleString()}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>HS 50% ({employe.heuresSup50}h)</TableCell>
-                <TableCell align="right">{HS_50.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.hs50 ?? HS_50).toLocaleString()}</TableCell>
               </TableRow>
 
               {/* ---------------- RETENUES ---------------- */}
@@ -292,28 +313,28 @@ function FichePaie() {
 
               <TableRow>
                 <TableCell>CNAPS (1%)</TableCell>
-                <TableCell align="right">{cnapsSalarie.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.cnaps ?? cnapsSalarie).toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell>OSTIE (1%)</TableCell>
-                <TableCell align="right">{ostieSalarie.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.ostie ?? ostieSalarie).toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell>Absence ({employe.absences}j)</TableCell>
-                <TableCell align="right">{retenueAbsence.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.retenueAbsence ?? retenueAbsence).toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell>IRSA</TableCell>
-                <TableCell align="right">{irsa.toLocaleString()}</TableCell>
+                <TableCell align="right">{(fiche?.irsa ?? irsa).toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Total Retenues</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
-                  {totalRetenues.toLocaleString()}
+                  {(fiche?.totalRetenues ?? totalRetenues).toLocaleString()}
                 </TableCell>
               </TableRow>
 
@@ -328,7 +349,7 @@ function FichePaie() {
                   align="right"
                   sx={{ fontWeight: 700, color: "green", fontSize: "18px" }}
                 >
-                  {netAPayer.toLocaleString()} Ar
+                  {(fiche?.netAPayer ?? netAPayer).toLocaleString()} Ar
                 </TableCell>
               </TableRow>
 
@@ -342,21 +363,21 @@ function FichePaie() {
               <TableRow>
                 <TableCell>CNAPS (13%)</TableCell>
                 <TableCell align="right">
-                  {chargePatronaleCnaps.toLocaleString()}
+                  {(fiche?.chargePatronaleCnaps ?? chargePatronaleCnaps).toLocaleString()}
                 </TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell>OSTIE (5%)</TableCell>
                 <TableCell align="right">
-                  {chargePatronaleOstie.toLocaleString()}
+                  {(fiche?.chargePatronaleOstie ?? chargePatronaleOstie).toLocaleString()}
                 </TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Coût total employeur</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700 }}>
-                  {coutTotalEmployeur.toLocaleString()}
+                  {(fiche?.coutTotalEmployeur ?? coutTotalEmployeur).toLocaleString()}
                 </TableCell>
               </TableRow>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -35,29 +35,17 @@ const ProfilEmploye = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const [employe] = useState({
-    prenom: "Tendry",
-    nom: "Rakoto",
-    matricule: "EMP-2025-001",
-    email: "tendry.rakoto@entreprise.com",
-    numero: "+261 34 12 345 67",
-    adresse: "Lot III Antananarivo",
-    date_naissance: "1995-06-15",
-    photo: "https://randomuser.me/api/portraits/men/32.jpg",
+  const [employe, setEmploye] = useState(null);
 
-    poste: "Développeur Full-Stack",
-    departement: "Informatique",
-    type_contrat: "CDI",
-    date_embauche: "2023-02-01",
-    salaire: "1 500 000 Ar",
-    manager: "Rabenandrasana Miora",
-
-    competences: ["React", "Node.js", "MySQL", "Docker", "CI/CD"],
-    documents: ["Contrat de travail", "Fiche de poste", "Règlement intérieur"],
-
-    description:
-      "Employé motivé et rigoureux, passionné par les systèmes d’information et l'amélioration continue. Toujours prêt à apprendre et à contribuer à la réussite du département.",
-  });
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const id = user?.id || 1;
+    import("../api/api").then(({ default: api }) => {
+      api.get(`/employers/${id}`)
+        .then(res => setEmploye(res.data))
+        .catch(() => setEmploye(null));
+    });
+  }, []);
 
   const goEdit = () => navigate("/Modifier-Profil-Employe");
   const goDocuments = () => navigate("/MesDocuments");
@@ -143,7 +131,7 @@ const ProfilEmploye = () => {
                 }}
               >
                 <Avatar
-                  src={employe.photo}
+                  src={employe?.photo || "https://randomuser.me/api/portraits/men/32.jpg"}
                   sx={{
                     width: 140,
                     height: 140,
@@ -161,11 +149,11 @@ const ProfilEmploye = () => {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  {employe.prenom} {employe.nom}
+                  {employe?.prenom || "-"} {employe?.nom || ""}
                 </Typography>
 
                 <Typography sx={{ color: theme.palette.text.secondary }}>
-                  {employe.poste} — {employe.departement}
+                  {employe?.poste || "-"} — {employe?.departement || "-"}
                 </Typography>
               </Box>
 
@@ -178,10 +166,10 @@ const ProfilEmploye = () => {
 
               <List>
                 {[
-                  { icon: <EmailIcon />, text: employe.email },
-                  { icon: <PhoneIcon />, text: employe.numero },
-                  { icon: <LocationOnIcon />, text: employe.adresse },
-                  { icon: <CalendarTodayIcon />, text: employe.date_naissance },
+                  { icon: <EmailIcon />, text: employe?.email || "-" },
+                  { icon: <PhoneIcon />, text: employe?.numero || "-" },
+                  { icon: <LocationOnIcon />, text: employe?.adresse || "-" },
+                  { icon: <CalendarTodayIcon />, text: employe?.date_naissance || "-" },
                 ].map((item, index) => (
                   <ListItem key={index} sx={{ px: 0, py: 1 }}>
                     <ListItemIcon sx={{ color: theme.palette.primary.main }}>
@@ -204,14 +192,14 @@ const ProfilEmploye = () => {
                   <ListItemIcon>
                     <BadgeIcon />
                   </ListItemIcon>
-                  <ListItemText primary={`Matricule : ${employe.matricule}`} />
+                  <ListItemText primary={`Matricule : ${employe?.matricule || "-"}`} />
                 </ListItem>
 
                 <ListItem>
                   <ListItemIcon>
                     <WorkIcon />
                   </ListItemIcon>
-                  <ListItemText primary={`Contrat : ${employe.type_contrat}`} />
+                  <ListItemText primary={`Contrat : ${employe?.type_contrat || "-"}`} />
                 </ListItem>
 
                 <ListItem>
@@ -219,7 +207,7 @@ const ProfilEmploye = () => {
                     <CalendarTodayIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary={`Date d'embauche : ${employe.date_embauche}`}
+                    primary={`Date d'embauche : ${employe?.date_embauche || "-"}`}
                   />
                 </ListItem>
 
@@ -227,7 +215,7 @@ const ProfilEmploye = () => {
                   <ListItemIcon>
                     <MonetizationOnIcon />
                   </ListItemIcon>
-                  <ListItemText primary={`Salaire : ${employe.salaire}`} />
+                  <ListItemText primary={`Salaire : ${employe?.salaire || "-"}`} />
                 </ListItem>
 
                 <ListItem>
@@ -235,7 +223,7 @@ const ProfilEmploye = () => {
                     <SupervisorAccountIcon />
                   </ListItemIcon>
                   <ListItemText
-                    primary={`Manager : ${employe.manager}`}
+                    primary={`Manager : ${employe?.manager || "-"}`}
                   />
                 </ListItem>
               </List>
@@ -248,7 +236,7 @@ const ProfilEmploye = () => {
               </Typography>
 
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                {employe.competences.map((c, i) => (
+                {(employe?.competences || ["-"]).map((c, i) => (
                   <Chip
                     key={i}
                     label={c}
@@ -267,8 +255,8 @@ const ProfilEmploye = () => {
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                 À propos
               </Typography>
-              <Typography sx={{ color: theme.palette.text.secondary }}>
-                {employe.description}
+                <Typography sx={{ color: theme.palette.text.secondary }}>
+                {employe?.description || "-"}
               </Typography>
 
               <Divider sx={{ my: 4 }} />
