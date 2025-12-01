@@ -39,7 +39,7 @@ const ModifierProfil = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/utilisateur", {
+      const response = await fetch("http://localhost:8181/api/utilisateur", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
