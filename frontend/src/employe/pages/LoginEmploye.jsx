@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../api/api";
 import {
   Box,
   Card,
@@ -37,12 +38,17 @@ const LoginEmploye = ({ onLogin }) => {
     event.preventDefault();
 
     if (isLogin) {
-      onLogin();
-      console.log("Connexion employe:", {
-        email: formData.email,
-        password: formData.password,
-      });
-      navigate("/tableaudebordEmploye");
+      api.post('/auth/employer/login', { email: formData.email, password: formData.password })
+        .then(res => {
+          const user = res.data;
+          localStorage.setItem('user', JSON.stringify(user));
+          if (typeof onLogin === 'function') onLogin(user);
+          navigate('/tableaudebordEmploye');
+        })
+        .catch(err => {
+          console.error('Erreur login employe', err);
+          alert('Échec connexion : vérifiez vos identifiants');
+        });
     } else {
       console.log("Inscription employe:", formData);
       setShowSuccess(true);

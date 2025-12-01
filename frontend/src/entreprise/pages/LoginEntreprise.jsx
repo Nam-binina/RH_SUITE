@@ -21,6 +21,7 @@ import {
   Clear,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 const LoginEntreprise = ({ onLogin }) => {
   const theme = useTheme();
@@ -55,13 +56,17 @@ const LoginEntreprise = ({ onLogin }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (isLogin) {
-      // Mode Login
-      onLogin();
-      console.log("Connexion avec:", {
-        email: formData.email,
-        password: formData.password,
-      });
-      navigate("/profilEntreprise");
+      api.post('/auth/entreprise/login', { email: formData.email, password: formData.password })
+        .then(res => {
+          const user = res.data;
+          localStorage.setItem('user', JSON.stringify(user));
+          if (typeof onLogin === 'function') onLogin(user);
+          navigate('/profilEntreprise');
+        })
+        .catch(err => {
+          console.error('Erreur login entreprise', err);
+          alert('Échec connexion entreprise');
+        });
     } else {
       // Mode Sign Up
       console.log("Inscription avec:", formData);
