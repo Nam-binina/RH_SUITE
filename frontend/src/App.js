@@ -174,19 +174,22 @@ function App() {
               {/* --------------------------------- */}
               {/* LOGIN ENTREPRISE */}
               {/* --------------------------------- */}
+
               <Route
                 path="/loginEntreprise"
                 element={
-                  user.isConnected && user.type === "entreprise"
-                    ? <Navigate to="/profilEntreprise" replace />
-                    : <LoginEntreprise onLogin={handleLoginEntreprise} />
+                  user.isConnected && user.type === "entreprise" ? (
+                    <Navigate to="/profilEntreprise" replace />
+                  ) : (
+                    <LoginEntreprise onLogin={handleLoginEntreprise} />
+                  )
                 }
               />
-
 
               {/* --------------------------------- */}
               {/* TABLEAU DE BORD CANDIDAT */}
               {/* --------------------------------- */}
+
               <Route
                 path="/tableaudebord"
                 element={
