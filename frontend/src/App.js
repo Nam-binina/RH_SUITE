@@ -27,6 +27,8 @@ import DeconnexionEmploye from "./employe/pages/Deconnexion";
 import ProfilEmploye from "./employe/pages/ProfilEmploye";
 import ModifierProfilEmploye from "./employe/pages/ModifierProfilEmploye";
 import MesDocuments from "./employe/pages/MesDocuments";
+import PerformanceEmploye from "./employe/pages/PerformanceEmploye";
+import DemandeCongeEmploye from "./employe/pages/DemandeCongeEmploye";
 
 // --- ENTREPRISE ---
 import LoginEntreprise from "./entreprise/pages/LoginEntreprise";
@@ -262,6 +264,26 @@ function App() {
                 element={
                   user.isConnected && user.type === "employe"
                     ? <FiltreMoisAnnee />
+                    : <Navigate to="/loginEmploye" replace />
+                }
+              />
+
+              {/* PAGE PERFORMANCE */}
+              <Route
+                path="/Performance-Employe"
+                element={
+                  user.isConnected && user.type === "employe"
+                    ? <PerformanceEmploye />
+                    : <Navigate to="/loginEmploye" replace />
+                }
+              />
+
+              {/* DEMANDE DE CONGÉ EMPLOYÉ */}
+              <Route
+                path="/demandeConge"
+                element={
+                  user.isConnected && user.type === "employe"
+                    ? <DemandeCongeEmploye />
                     : <Navigate to="/loginEmploye" replace />
                 }
               />

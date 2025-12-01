@@ -36,6 +36,7 @@ function FichePaie() {
   const [annee, setAnnee] = useState(currentYear);
   const [filtreValide, setFiltreValide] = useState(false);
   const [fiche, setFiche] = useState(null);
+  const [employeServer, setEmployeServer] = useState(null);
   const goTableaudebord = () => navigate("/tableaudebordEmploye");
 
   useEffect(() => {
@@ -44,14 +45,44 @@ function FichePaie() {
     const id = user?.id || 1;
     const moisIndex = moisListe.indexOf(mois) + 1;
     import("../api/api").then(({ default: api }) => {
+      // fetch fiche
       api.get(`/fiche-paie/employe/${id}/mois/${moisIndex}/annee/${annee}`)
         .then(res => setFiche(res.data))
         .catch(() => setFiche(null));
+
+      // fetch employer info
+      api.get(`/employers/${id}`)
+        .then(res => setEmployeServer(res.data))
+        .catch(() => setEmployeServer(null));
     });
   }, [filtreValide]);
 
-  // ------------------------- DONNÉES EXEMPLE -----------------------
-  const employe = {
+  // ------------------------- EMPLOYE (server or fallback) -----------------------
+  const normalizeEmployer = (e) => {
+    if (!e) return null;
+    return {
+      id: e.id,
+      matricule: e.matricule || "-",
+      // prefer prenom + nom when available
+      nom: `${e.prenom ? e.prenom + ' ' : ''}${e.nom || ''}`.trim() || (e.nom || '-'),
+      // best-effort mapping for missing fields
+      fonction: e.poste || (e.idPoste ? `Poste #${e.idPoste}` : "-"),
+      categorie: e.categorie || (e.idTypeContrat ? `Type #${e.idTypeContrat}` : "-"),
+      contrat: e.contrat || (e.idTypeContrat ? `Type #${e.idTypeContrat}` : "-"),
+      dateEntree: e.dateEmbauche || e.date_entree || "2022-01-01",
+      cnaps: e.tauxCnaps ?? e.cnaps ?? null,
+      secteur: e.secteur || "-",
+      salaireBase: e.salaireBrut ? Number(e.salaireBrut) : (e.salaireBase ? Number(e.salaireBase) : 0),
+      // primes/indemnites/absences/HS may not be stored on Employer; default to 0
+      primes: e.primes ?? 0,
+      indemnite: e.indemnite ?? 0,
+      absences: e.absences ?? 0,
+      heuresSup30: e.heuresSup30 ?? 0,
+      heuresSup50: e.heuresSup50 ?? 0,
+    };
+  };
+
+  const employe = normalizeEmployer(employeServer) || {
     matricule: "EMP-4478",
     nom: "Andriabarimanana Tendry",
     fonction: "Développeur FullStack",
@@ -73,30 +104,34 @@ function FichePaie() {
     (new Date() - new Date(employe.dateEntree)) / (1000 * 60 * 60 * 24 * 365)
   );
 
-  const salaireBrut = employe.salaireBase + employe.primes + employe.indemnite;
+  // Values coming from fiche if present, otherwise computed from employer fallback
+  const salaireBaseVal = fiche?.salaireBase ?? employe.salaireBase;
+  const primesVal = fiche?.primes ?? employe.primes ?? 0;
+  const indemniteVal = fiche?.indemnites ?? employe.indemnite ?? 0;
 
-  const cnapsSalarie = salaireBrut * 0.01;
-  const ostieSalarie = salaireBrut * 0.01;
+  const salaireBrut = (fiche?.totalBrut) ?? (Number(salaireBaseVal || 0) + Number(primesVal || 0) + Number(indemniteVal || 0));
 
-  const tauxHoraire = (employe.salaireBase / 30) / 8;
+  const cnapsSalarie = Number(fiche?.cnaps ?? (salaireBrut * 0.01));
+  const ostieSalarie = Number(fiche?.ostie ?? (salaireBrut * 0.01));
 
-  const HS_30 = employe.heuresSup30 * tauxHoraire * 1.3;
-  const HS_50 = employe.heuresSup50 * tauxHoraire * 1.5;
+  const tauxHoraire = (Number(salaireBaseVal || 0) / 30) / 8;
 
-  const retenueAbsence = (employe.salaireBase / 30) * employe.absences;
+  const HS_30 = Number(fiche?.hs30 ?? (employe.heuresSup30 * tauxHoraire * 1.3));
+  const HS_50 = Number(fiche?.hs50 ?? (employe.heuresSup50 * tauxHoraire * 1.5));
+
+  const retenueAbsence = Number(fiche?.retenueAbsence ?? ((Number(salaireBaseVal || 0) / 30) * (employe.absences || 0)));
   const revenuImposable = salaireBrut - cnapsSalarie - ostieSalarie;
-  const irsa = Math.max(0, revenuImposable * 0.05);
+  const irsa = Number(fiche?.irsa ?? Math.max(0, revenuImposable * 0.05));
 
-  const totalRetenues = cnapsSalarie + ostieSalarie + retenueAbsence + irsa;
-  const netAPayer = salaireBrut + HS_30 + HS_50 - totalRetenues;
+  const totalRetenues = Number(fiche?.totalRetenues ?? (cnapsSalarie + ostieSalarie + retenueAbsence + irsa));
+  const netAPayer = Number(fiche?.netAPayer ?? (salaireBrut + HS_30 + HS_50 - totalRetenues));
 
-  const chargePatronaleCnaps = salaireBrut * 0.13;
-  const chargePatronaleOstie = salaireBrut * 0.05;
-  const coutTotalEmployeur =
-    salaireBrut + HS_30 + HS_50 + chargePatronaleCnaps + chargePatronaleOstie;
+  const chargePatronaleCnaps = Number(fiche?.chargePatronaleCnaps ?? (salaireBrut * 0.13));
+  const chargePatronaleOstie = Number(fiche?.chargePatronaleOstie ?? (salaireBrut * 0.05));
+  const coutTotalEmployeur = Number(fiche?.coutTotalEmployeur ?? (salaireBrut + HS_30 + HS_50 + chargePatronaleCnaps + chargePatronaleOstie));
 
   // ---------------------------- EXPORT XLSX ----------------------------
-  const exportXlsx = () => {
+  const exportXlsx = async () => {
     const data = [
       [`Fiche de paie - ${mois} ${annee}`],
       [],
@@ -132,6 +167,29 @@ function FichePaie() {
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "FichePaie");
+    // if fiche available and has an id, try backend export first
+    if (fiche && fiche.id) {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        const idEmp = user?.id || 1;
+        const moisIndex = moisListe.indexOf(mois) + 1;
+        const api = (await import("../api/api")).default;
+        const res = await api.get(`/fiche-paie/export/${fiche.id}`, { responseType: 'arraybuffer' });
+        const blob = new Blob([res.data], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fiche_de_paie_${mois}_${annee}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      } catch (e) {
+        // fallback to client-side file if backend export fails
+        console.warn('Backend export failed, falling back to client XLSX', e);
+      }
+    }
 
     XLSX.writeFile(wb, `fiche_de_paie_${mois}_${annee}.xlsx`);
   };
