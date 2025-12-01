@@ -9,7 +9,7 @@ import {
   ListItemButton,
   ListItemIcon,
 } from "@mui/material";
-import { Business, People, Campaign, Logout,  ListAlt } from "@mui/icons-material";
+import { Business, People, Logout, CalendarToday, HourglassEmpty, RateReview } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 
 const StyledTooltip = styled(({ className, ...props }) => (
@@ -292,16 +292,22 @@ export default function NavbarEntreprise({ onLogout }) {
       navigate: "/listCandidate",
     },
     {
-      icon: <Campaign />,
-      label: "Announcement",
-      id: "announcement",
-      navigate: "/announcement",
+      icon: <CalendarToday />,
+      label: "Calendrier & Absences",
+      id: "calendrierAbsences",
+      navigate: "/calendrierAbsences",
     },
     {
-      icon: <ListAlt />,
-      label: "List Announcement",
-      id: "listAnnouncement",
-      navigate: "/listAnnouncement",
+      icon: <HourglassEmpty />,
+      label: "Demandes de Conge",
+      id: "demandesConge",
+      navigate: "/demandesConge",
+    },
+    {
+      icon: <RateReview />,
+      label: "Configuration",
+      id: "configuration",
+      navigate: "/configuration",
     },
   ];
 
