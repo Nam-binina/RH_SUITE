@@ -1,7 +1,7 @@
 import { createTheme, CssBaseline, ThemeProvider, Box } from "@mui/material";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // --- CANDIDAT ---
 import LoginCandidat from "./candidat/pages/LoginCandidat";
@@ -53,7 +53,10 @@ const theme = createTheme({
     primary: { main: "#7e57c2", light: "#b085f5", dark: "#4d2c91", contrastText: "#ffffff" },
     secondary: { main: "#b085f5", light: "#e1d6ff", dark: "#7e57c2" },
     background: { default: "#0f0b16", paper: "#1a1525" },
-    text: { primary: "#ffffff", secondary: "rgba(255, 255, 255, 0.7)" },
+    text: { primary: "#ffffff", secondary: "rgba(255, 255, 255, 0.7)", disabled: "rgba(255, 255, 255, 0.5)" },
+    success: { main: "#4caf50", contrastText: "#ffffff" },
+    warning: { main: "#ffa726" },
+    error: { main: "#f44336" },
     divider: "rgba(126, 87, 194, 0.3)",
   },
   typography: {
@@ -112,6 +115,20 @@ const theme = createTheme({
 
 function App() {
   const [user, setUser] = useState({ isConnected: false, type: null });
+
+  // Initialize user from localStorage so routes/navbar persist on reload
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("user") || "null");
+      if (stored) {
+        // stored may contain a `type` or `roles` field depending on auth flow
+        const inferredType = stored.type || (stored.roles ? String(stored.roles[0]).toLowerCase() : null);
+        setUser({ isConnected: true, type: inferredType });
+      }
+    } catch (e) {
+      // ignore invalid localStorage
+    }
+  }, []);
 
   // CONNEXION / DECONNEXION
   const handleLoginCandidat = () => setUser({ isConnected: true, type: "candidat" });
@@ -310,8 +327,8 @@ function App() {
               <Route path="/demandesConge" element={user.isConnected && user.type === "entreprise" ? <DemandesConge /> : <Navigate to="/loginEntreprise" replace />} />
               <Route path="/configuration" element={user.isConnected && user.type === "entreprise" ? <Configuration /> : <Navigate to="/loginEntreprise" replace />} />
               <Route path="/filter" element={user.isConnected && user.type === "entreprise" ? <Filter /> : <Navigate to="/loginEntreprise" replace />} />
-              <Route path="/voirprofil/:id" element={user.type === "entreprise" ? <VoirProfil /> : <Navigate to="/loginEntreprise" />} />
-              <Route path="/voirprofil" element={user.isConnected && user.type === "entreprise" ? <VoirProfil /> : <Navigate to="/loginEntreprise" replace />} />
+              <Route path="/voirprofil/:id" element={user.type === "entreprise" ? <VoirProfil theme={theme} /> : <Navigate to="/loginEntreprise" />} />
+              <Route path="/voirprofil" element={user.isConnected && user.type === "entreprise" ? <VoirProfil theme={theme} /> : <Navigate to="/loginEntreprise" replace />} />
 
             </Routes>
           </Box>
