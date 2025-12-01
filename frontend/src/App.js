@@ -36,6 +36,10 @@ import Announcement from "./entreprise/pages/Announcement";
 import VoirProfil from "./entreprise/pages/VoirProfil";
 import Filter from "./entreprise/pages/Filter";
 import ListingAnnouncement from "./entreprise/pages/ListingAnnouncement";
+import ListCandidate from "./entreprise/pages/ListCandidate";
+import CalendrierAbsences from "./entreprise/pages/CalendrierAbsences";
+import DemandesConge from "./entreprise/pages/DemandesConge";
+import Configuration from "./entreprise/pages/Configuration";
 
 // --- PAGE D’ACCUEIL ---
 import Home from "./Home";
@@ -58,6 +62,50 @@ const theme = createTheme({
     button: { textTransform: "none", fontWeight: 600 },
   },
   shape: { borderRadius: 12 },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "rgba(26, 21, 37, 0.95)",
+          backdropFilter: "blur(20px)",
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#1a1525",
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1a1525",
+          backgroundImage: "none",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "12px",
+          textTransform: "none",
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          borderRadius: "16px",
+        },
+      },
+    },
+  },
 });
 
 function App() {
@@ -71,8 +119,14 @@ function App() {
 
   // NAVBAR : visible uniquement pour entreprise
   const renderNavbar = () => {
-    if (!user.isConnected) return null;
-    if (user.type === "entreprise") return <NavbarEntreprise onLogout={handleLogout} />;
+    if(!user.isConnected) return null;
+    if (user.type === "entreprise") {
+      return (
+        <div position="fixed">
+          <NavbarEntreprise onLogout={handleLogout} />
+        </div>
+      )
+    }
     return null;
   };
 
@@ -82,7 +136,7 @@ function App() {
       <Box sx={{ display: "flex", minHeight: "100vh", background: "linear-gradient(135deg, #0f0b16 0%, #1a1525 100%)" }}>
         <Router>
           {renderNavbar()}
-          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh", marginLeft: user.isConnected && user.type === "entreprise" ? "80px" : 0 }}>
             <Routes>
 
               {/* --------------------------------- */}
@@ -124,7 +178,7 @@ function App() {
                 path="/loginEntreprise"
                 element={
                   user.isConnected && user.type === "entreprise"
-                    ? <Navigate to="/listAnnouncement" replace />
+                    ? <Navigate to="/profilEntreprise" replace />
                     : <LoginEntreprise onLogin={handleLoginEntreprise} />
                 }
               />
@@ -229,7 +283,13 @@ function App() {
               {/* ROUTES ENTREPRISE */}
               {/* --------------------------------- */}
               <Route path="/listAnnouncement" element={user.type === "entreprise" ? <ListingAnnouncement /> : <Navigate to="/loginEntreprise" />} />
+              <Route path="/listCandidate" element={user.isConnected && user.type === "entreprise" ? <ListCandidate /> : <Navigate to="/loginEntreprise" replace />} />
+              <Route path="/calendrierAbsences" element={user.isConnected && user.type === "entreprise" ? <CalendrierAbsences /> : <Navigate to="/loginEntreprise" replace />} />
+              <Route path="/demandesConge" element={user.isConnected && user.type === "entreprise" ? <DemandesConge /> : <Navigate to="/loginEntreprise" replace />} />
+              <Route path="/configuration" element={user.isConnected && user.type === "entreprise" ? <Configuration /> : <Navigate to="/loginEntreprise" replace />} />
+              <Route path="/filter" element={user.isConnected && user.type === "entreprise" ? <Filter /> : <Navigate to="/loginEntreprise" replace />} />
               <Route path="/voirprofil/:id" element={user.type === "entreprise" ? <VoirProfil /> : <Navigate to="/loginEntreprise" />} />
+              <Route path="/voirprofil" element={user.isConnected && user.type === "entreprise" ? <VoirProfil /> : <Navigate to="/loginEntreprise" replace />} />
 
             </Routes>
           </Box>
