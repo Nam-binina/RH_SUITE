@@ -14,7 +14,7 @@ import {
 import { Lock, Person, Email, Phone, Save, Clear } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-const LoginCandidat = ({ onLogin }) => {
+const LoginEmploye = ({ onLogin }) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -38,13 +38,13 @@ const LoginCandidat = ({ onLogin }) => {
 
     if (isLogin) {
       onLogin();
-      console.log("Connexion candidat:", {
+      console.log("Connexion employe:", {
         email: formData.email,
         password: formData.password,
       });
-      navigate("/tableaudebord");
+      navigate("/tableaudebordEmploye");
     } else {
-      console.log("Inscription candidat:", formData);
+      console.log("Inscription employe:", formData);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 5000);
     }
@@ -93,7 +93,7 @@ const LoginCandidat = ({ onLogin }) => {
                     mb: 1,
                   }}
                 >
-                  {isLogin ? "Connexion Candidat" : "Créer un Compte Candidat"}
+                  {isLogin ? "Connexion employe" : "Créer un Compte employe"}
                 </Typography>
 
                 <Typography variant="body2" sx={{ mt: 2 }}>
@@ -128,7 +128,7 @@ const LoginCandidat = ({ onLogin }) => {
                   >
                     {isLogin
                       ? "Connexion réussie !"
-                      : "Compte candidat créé avec succès !"}
+                      : "Compte employe créé avec succès !"}
                   </Alert>
                 </Fade>
               )}
@@ -234,4 +234,4 @@ const LoginCandidat = ({ onLogin }) => {
   );
 };
 
-export default LoginCandidat;
+export default LoginEmploye;

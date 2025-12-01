@@ -9,7 +9,7 @@ import {
   ListItemButton,
   ListItemIcon,
 } from "@mui/material";
-import { Business, People, Campaign, Logout,  ListAlt } from "@mui/icons-material";
+import { Business, People, Campaign, Logout } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 
 const StyledTooltip = styled(({ className, ...props }) => (
@@ -296,12 +296,6 @@ export default function NavbarEntreprise({ onLogout }) {
       label: "Announcement",
       id: "announcement",
       navigate: "/announcement",
-    },
-    {
-      icon: <ListAlt />,
-      label: "List Announcement",
-      id: "listAnnouncement",
-      navigate: "/listAnnouncement",
     },
   ];
 

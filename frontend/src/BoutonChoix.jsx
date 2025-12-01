@@ -185,12 +185,25 @@ const ButtonShowcase = () => {
         <h3 style={{ color: theme.palette.text.primary, marginBottom: "16px" }}>
           Si tu es candidat :
         </h3>
-        <Link to="/LoginCandidat">
+        <Link to="/loginCandidat">
           <BoutonChoix variant="gradient" fullWidth startIcon={<SendIcon />}>
             Candidat
           </BoutonChoix>
         </Link>
       </Box>
+
+       <Box>
+        <h3 style={{ color: theme.palette.text.primary, marginBottom: "16px" }}>
+          Si tu es employe :
+        </h3>
+        <Link to="/loginEmploye">
+          <BoutonChoix variant="gradient" fullWidth startIcon={<SendIcon />}>
+            employe
+          </BoutonChoix>
+        </Link>
+      </Box>
+
+
       <Box>
         <h3 style={{ color: theme.palette.text.primary, marginBottom: "16px" }}>
           Si tu es une entreprise :

@@ -1,0 +1,17 @@
+
+
+ B-Partie employer
+        1-Pointage de presence
+            -Une input date pour le jour du pointage
+            -Une input time pour l'heure d'entree
+            -Une input time pour l'heure de sortie
+            -Une input time pour le debut des pause
+            -Une input time pour la fin des pauses
+            -Un bouton submit
+        2-Une page relever de presence
+            -Une input date pour obtenir la date necessaire du pointage
+            -Un bouton submit
+            -Type de retour pdf du pointage
+        3-Fiche de paye mensuelle
+            -Un tableau ressemblant a la fiche_de_paie.xlsx
+            -Un bouton exporter en xlsx si necessaire
