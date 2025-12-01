@@ -216,3 +216,9 @@ FROM employer e
 JOIN type_conge t ON t.nom = 'Congé exceptionnel'
 WHERE e.id = 3;
 
+INSERT INTO entreprise (nom, prenom, email, mdp, numero, adresse) VALUES
+('Rakoto', 'Jean', 'jean.rakoto@example.com', 'pass2024', '0341234567', 'Lot II A 45 Faravohitra'),
+('Randria', 'Miora', 'miora.randria@example.com', 'pass2024', '0339876543', 'Ivandry, Antananarivo'),
+('Rasoanaivo', 'Hery', 'hery.raso@example.com', 'azerty', '0324455667', 'Analamahitsy, Antananarivo'),
+('Andrianina', 'Tiana', 'tiana.andrianina@example.com', 'secure01', '0348877665', 'Ambatoroka, Antananarivo'),
+('Ravelomanana', 'Fara', 'fara.ravel@example.com', 'mypassword', '0331122334', 'Isoraka, Antananarivo');
